@@ -26,7 +26,7 @@ const NAV = [
 ];
 
 export default function App() {
-  const [data, setData] = useLocalStorage('finanzas-app-data', defaultData);
+  const [data, setData] = useLocalStorage('finanzas-app-data-v2', defaultData);
   const [activeView, setActiveView] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

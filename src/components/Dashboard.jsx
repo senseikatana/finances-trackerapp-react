@@ -1,7 +1,50 @@
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { defaultData, MONTHS, CURRENT_MONTH } from '../data/defaultData';
+import { defaultData, MONTHS, CURRENT_MONTH, sampleData } from '../data/defaultData';
 
 export default function Dashboard({ data, setData }) {
+  const handleLoadSample = () => {
+    if (confirm('¿Estás seguro de que quieres cargar los datos de ejemplo? Esto sobrescribirá tus datos actuales.')) {
+      setData(sampleData);
+    }
+  };
+
+  const handleExport = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `finanzas_backup_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
+  const handleImport = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (parsed && typeof parsed === 'object' && parsed.settings) {
+          setData(parsed);
+          alert('¡Datos importados con éxito!');
+        } else {
+          alert('Error: El archivo JSON no tiene el formato correcto de Finanzas App.');
+        }
+      } catch (err) {
+        alert('Error al leer el archivo JSON.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleClear = () => {
+    if (confirm('¿Estás seguro de que quieres borrar todos tus datos? Esta acción es irreversible.')) {
+      setData(defaultData);
+    }
+  };
+
   const incomeTotal = data.income.reduce((s, i) => s + Number(i.amount), 0);
   const fixedTotal = data.fixedExpenses.reduce((s, e) => s + Number(e.amount), 0);
   const varTotal = data.variableExpenses.reduce((s, e) => s + Number(e.amount), 0);
@@ -17,6 +60,7 @@ export default function Dashboard({ data, setData }) {
   const savingsRate = incomeTotal > 0 ? (netBalance / incomeTotal) * 100 : 0;
   const totalSaved = data.savingsGoals.reduce((s, g) => s + Number(g.saved), 0);
   const totalTarget = data.savingsGoals.reduce((s, g) => s + Number(g.target), 0);
+  const savingsProgress = totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0;
   const totalDebt = data.debts.reduce((s, d) => s + Number(d.total) - Number(d.paid), 0);
 
   return (
@@ -50,8 +94,8 @@ export default function Dashboard({ data, setData }) {
             {totalSaved.toFixed(0)}€ / {totalTarget.toFixed(0)}€
           </div>
           <div className="progress-bar" style={{marginTop:'6px'}}>
-            <div className={`progress-fill ${totalSaved/totalTarget > 0.5 ? 'progress-green' : 'progress-orange'}`}
-                 style={{width:`${Math.min(100, (totalSaved/totalTarget)*100)}%`}} />
+            <div className={`progress-fill ${savingsProgress > 50 ? 'progress-green' : 'progress-orange'}`}
+                 style={{width:`${Math.min(100, savingsProgress)}%`}} />
           </div>
         </div>
         <div className="stat-card">
@@ -142,6 +186,35 @@ export default function Dashboard({ data, setData }) {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <span className="card-title">💾 Gestión de Datos</span>
+        </div>
+        <p style={{fontSize:'12px',color:'var(--text-light)',marginBottom:'16px'}}>
+          Administra la persistencia de tus finanzas. Puedes exportar e importar copias de seguridad en formato JSON para transferir tus datos entre diferentes puertos locales (como el de desarrollo y el de vista previa) o a producción, así como cargar datos ficticios para demostraciones y pruebas rápidas.
+        </p>
+        <div style={{display:'flex',flexWrap:'wrap',gap:'10px'}}>
+          <button className="btn btn-primary" onClick={handleLoadSample}>
+            Cargar Datos de Ejemplo
+          </button>
+          <button className="btn btn-ghost" onClick={handleExport}>
+            📥 Exportar Backup (JSON)
+          </button>
+          <button className="btn btn-ghost" style={{position:'relative',overflow:'hidden'}}>
+            📤 Importar Backup (JSON)
+            <input 
+              type="file" 
+              accept=".json" 
+              onChange={handleImport} 
+              style={{position:'absolute',top:0,left:0,opacity:0,width:'100%',height:'100%',cursor:'pointer'}} 
+            />
+          </button>
+          <button className="btn btn-red" onClick={handleClear} style={{marginLeft:'auto'}}>
+            🗑️ Limpiar Todo
+          </button>
         </div>
       </div>
     </div>
