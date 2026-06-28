@@ -1,21 +1,53 @@
 import { useState } from 'react';
+import Modal from './Modal';
 
 export default function DailyRegister({ data, setData }) {
   const [filter, setFilter] = useState('all');
-  const entries = data.dailyRegister || [];
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [form, setForm] = useState({ date: '', category: 'Otros', concept: '', amount: '', type: 'Variable', necessary: true, notes: '' });
 
-  const addEntry = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const newId = Math.max(...entries.map(e => e.id), 0) + 1;
-    setData(d => ({
-      ...d,
-      dailyRegister: [{ id: newId, date: today, category: 'Otros', concept: '', amount: 0, type: 'Variable', necessary: true, notes: '' }, ...d.dailyRegister]
-    }));
+  const entries = data.dailyRegister || [];
+  const categories = data.expenseCategories || [];
+
+  const openCreateModal = () => {
+    setEditingItem(null);
+    setForm({ date: new Date().toISOString().split('T')[0], category: categories[0] || 'Otros', concept: '', amount: '', type: 'Variable', necessary: true, notes: '' });
+    setModalOpen(true);
   };
 
-  const update = (id, field, value) => setData(d => ({
-    ...d, dailyRegister: d.dailyRegister.map(e => e.id === id ? { ...e, [field]: value } : e)
-  }));
+  const openEditModal = (item) => {
+    setEditingItem(item);
+    setForm({ ...item, amount: item.amount.toString() });
+    setModalOpen(true);
+  };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    if (!form.concept.trim() || Number(form.amount) <= 0) {
+      alert('Por favor, introduce un concepto y un importe válido.');
+      return;
+    }
+
+    const payload = {
+      ...form,
+      amount: Number(form.amount),
+    };
+
+    if (editingItem) {
+      setData(d => ({
+        ...d,
+        dailyRegister: d.dailyRegister.map(e => e.id === editingItem.id ? { ...e, ...payload } : e)
+      }));
+    } else {
+      const newId = Math.max(...entries.map(e => e.id), 0) + 1;
+      setData(d => ({
+        ...d,
+        dailyRegister: [{ id: newId, ...payload }, ...d.dailyRegister]
+      }));
+    }
+    setModalOpen(false);
+  };
 
   const remove = (id) => {
     if (confirm('¿Eliminar este gasto?')) {
@@ -23,8 +55,14 @@ export default function DailyRegister({ data, setData }) {
     }
   };
 
+  const toggleNecessary = (id, currentVal) => {
+    setData(d => ({
+      ...d,
+      dailyRegister: d.dailyRegister.map(e => e.id === id ? { ...e, necessary: !currentVal } : e)
+    }));
+  };
+
   const filtered = filter === 'all' ? entries : entries.filter(e => e.type === filter);
-  const total = filtered.reduce((s, e) => s + Number(e.amount), 0);
   const totalFijo = entries.filter(e => e.type === 'Fijo').reduce((s, e) => s + Number(e.amount), 0);
   const totalVar = entries.filter(e => e.type === 'Variable').reduce((s, e) => s + Number(e.amount), 0);
   const totalExtra = entries.filter(e => e.type === 'Extraordinario').reduce((s, e) => s + Number(e.amount), 0);
@@ -34,7 +72,7 @@ export default function DailyRegister({ data, setData }) {
       <div className="card">
         <div className="card-header">
           <span className="card-title">Registro Diario</span>
-          <button className="btn btn-primary" onClick={addEntry}>+ Nuevo Gasto</button>
+          <button className="btn btn-primary" onClick={openCreateModal}>+ Nuevo Gasto</button>
         </div>
         <p style={{fontSize:'12px',color:'var(--text-light)',marginBottom:'12px'}}>
           Anota cada gasto nada más producirlo. Clasifícalo como Fijo, Variable o Extraordinario.
@@ -58,32 +96,31 @@ export default function DailyRegister({ data, setData }) {
         <div className="table-wrapper">
           <table>
             <thead><tr>
-              <th>Fecha</th><th>Categoría</th><th>Concepto</th><th className="text-right">Importe</th><th>Tipo</th><th style={{textAlign:'center'}}>Necesario</th><th>Notas</th><th></th>
+              <th>Fecha</th><th>Categoría</th><th>Concepto</th><th className="text-right">Importe</th><th>Tipo</th><th style={{textAlign:'center'}}>Necesario</th><th>Notas</th><th className="text-center" style={{ width: '120px' }}>Acciones</th>
             </tr></thead>
             <tbody>
               {filtered.map(e => (
                 <tr key={e.id}>
-                  <td><input type="date" value={e.date} onChange={e2 => update(e.id, 'date', e2.target.value)} style={{minWidth:'90px'}} /></td>
+                  <td>{e.date}</td>
+                  <td><span className="badge badge-orange">{e.category}</span></td>
+                  <td><strong>{e.concept}</strong></td>
+                  <td className="text-right text-red" style={{ fontWeight: '600' }}>{Number(e.amount).toFixed(2)}€</td>
                   <td>
-                    <select value={e.category} onChange={e2 => update(e.id, 'category', e2.target.value)}>
-                      {(data.expenseCategories || []).map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </td>
-                  <td><input type="text" value={e.concept} onChange={e2 => update(e.id, 'concept', e2.target.value)} placeholder="¿Qué compraste?" style={{minWidth:'100px'}} /></td>
-                  <td><input type="number" step="0.01" min="0" value={e.amount} onChange={e2 => update(e.id, 'amount', e2.target.value)} className="text-right" style={{width:'80px'}} /></td>
-                  <td>
-                    <select value={e.type} onChange={e2 => update(e.id, 'type', e2.target.value)}>
-                      <option value="Variable">Variable</option>
-                      <option value="Fijo">Fijo</option>
-                      <option value="Extraordinario">Extraordinario</option>
-                    </select>
+                    <span className={`badge ${e.type === 'Fijo' ? 'badge-blue' : e.type === 'Variable' ? 'badge-orange' : e.type === 'Extraordinario' ? 'badge-red' : 'badge-green'}`}>
+                      {e.type}
+                    </span>
                   </td>
                   <td style={{textAlign:'center'}}>
-                    <input type="checkbox" checked={e.necessary} onChange={e2 => update(e.id, 'necessary', e2.target.checked)}
-                           style={{width:'auto',transform:'scale(1.2)'}} />
+                    <input type="checkbox" checked={e.necessary} onChange={() => toggleNecessary(e.id, e.necessary)}
+                           style={{width:'auto',transform:'scale(1.2)', cursor: 'pointer'}} />
                   </td>
-                  <td><input type="text" value={e.notes} onChange={e2 => update(e.id, 'notes', e2.target.value)} placeholder="Notas" style={{minWidth:'60px'}} /></td>
-                  <td><button className="btn btn-ghost btn-sm" onClick={() => remove(e.id)}>✕</button></td>
+                  <td><span className="text-muted">{e.notes || '—'}</span></td>
+                  <td className="text-center">
+                    <div style={{ display: 'inline-flex', gap: '6px' }}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => openEditModal(e)}>✏️</button>
+                      <button className="btn btn-ghost btn-sm text-red" onClick={() => remove(e.id)}>✕</button>
+                    </div>
+                  </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
@@ -117,6 +154,51 @@ export default function DailyRegister({ data, setData }) {
           </div>
         </div>
       </div>
+
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingItem ? "Editar Registro" : "Nuevo Registro"}>
+        <form onSubmit={handleSave}>
+          <div className="form-group">
+            <label>Fecha</label>
+            <input type="date" required value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
+          </div>
+          <div className="form-group">
+            <label>Categoría</label>
+            <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+              {categories.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Concepto</label>
+            <input type="text" required placeholder="Ej. Compra súper, Cena, Gasolina..." value={form.concept} onChange={e => setForm({ ...form, concept: e.target.value })} />
+          </div>
+          <div className="form-row" style={{ gap: '10px' }}>
+            <div className="form-group" style={{ flex: '1' }}>
+              <label>Importe (€)</label>
+              <input type="number" step="0.01" min="0.01" required placeholder="0.00" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} />
+            </div>
+            <div className="form-group" style={{ flex: '1' }}>
+              <label>Tipo de Gasto</label>
+              <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
+                <option value="Variable">Variable</option>
+                <option value="Fijo">Fijo</option>
+                <option value="Extraordinario">Extraordinario</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
+            <input type="checkbox" id="necessaryDailyCheck" checked={form.necessary} onChange={e => setForm({ ...form, necessary: e.target.checked })} style={{ width: 'auto' }} />
+            <label htmlFor="necessaryDailyCheck" style={{ margin: 0, cursor: 'pointer' }}>Gasto de primera necesidad</label>
+          </div>
+          <div className="form-group">
+            <label>Notas</label>
+            <input type="text" placeholder="Notas adicionales..." value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
+          </div>
+          <div className="modal-footer">
+            <button type="button" className="btn btn-ghost" onClick={() => setModalOpen(false)}>Cancelar</button>
+            <button type="submit" className="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
