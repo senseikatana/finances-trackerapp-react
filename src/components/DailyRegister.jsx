@@ -191,7 +191,7 @@ export default function DailyRegister({ data, setData }) {
           </div>
           <div className="form-group">
             <label>Notas</label>
-            <input type="text" placeholder="Notas adicionales..." value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
+            <textarea placeholder="Notas adicionales..." value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} style={{ height: '60px', resize: 'vertical' }} />
           </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-ghost" onClick={() => setModalOpen(false)}>Cancelar</button>
