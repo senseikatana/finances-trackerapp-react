@@ -1,13 +1,27 @@
+import { MONTHS, CURRENT_MONTH, CURRENT_YEAR } from '../data/defaultData';
+
 export default function Budget({ data, setData }) {
+  const selectedMonth = data.settings.month || CURRENT_MONTH;
+  const selectedYear = Number(data.settings.year || CURRENT_YEAR);
+
+  const isSelectedPeriod = (dateStr) => {
+    if (!dateStr) return false;
+    const [y, m] = dateStr.split('-');
+    const monthIndex = parseInt(m, 10) - 1;
+    const itemMonth = MONTHS[monthIndex];
+    const itemYear = parseInt(y, 10);
+    return itemMonth === selectedMonth && itemYear === selectedYear;
+  };
+
   const totalExpenses = (cat) => {
     const fromFixed = data.fixedExpenses
       .filter(e => e.category === cat)
       .reduce((s, e) => s + Number(e.amount), 0);
     const fromVar = data.variableExpenses
-      .filter(e => e.category === cat)
+      .filter(e => e.category === cat && isSelectedPeriod(e.date))
       .reduce((s, e) => s + Number(e.amount), 0);
     const fromDaily = (data.dailyRegister || [])
-      .filter(e => e.category === cat)
+      .filter(e => e.category === cat && isSelectedPeriod(e.date))
       .reduce((s, e) => s + Number(e.amount), 0);
     return fromFixed + fromVar + fromDaily;
   };
@@ -24,7 +38,7 @@ export default function Budget({ data, setData }) {
     <div>
       <div className="card">
         <div className="card-header">
-          <span className="card-title">Presupuesto Mensual</span>
+          <span className="card-title">Presupuesto Mensual · {selectedMonth} {selectedYear}</span>
         </div>
         <p style={{fontSize:'12px',color:'var(--text-light)',marginBottom:'12px'}}>
           Define cuánto quieres gastar en cada categoría. Los datos reales se calculan automáticamente desde tus gastos registrados.

@@ -1,5 +1,5 @@
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { defaultData, MONTHS, CURRENT_MONTH, sampleData } from '../data/defaultData';
+import { defaultData, MONTHS, CURRENT_MONTH, CURRENT_YEAR, sampleData } from '../data/defaultData';
 
 export default function Dashboard({ data, setData }) {
   const handleLoadSample = () => {
@@ -45,9 +45,32 @@ export default function Dashboard({ data, setData }) {
     }
   };
 
-  const incomeTotal = data.income.reduce((s, i) => s + Number(i.amount), 0);
+  const selectedMonth = data.settings.month || CURRENT_MONTH;
+  const selectedYear = Number(data.settings.year || CURRENT_YEAR);
+
+  const isSelectedPeriod = (dateStr) => {
+    if (!dateStr) return false;
+    const [y, m] = dateStr.split('-');
+    const monthIndex = parseInt(m, 10) - 1;
+    const itemMonth = MONTHS[monthIndex];
+    const itemYear = parseInt(y, 10);
+    return itemMonth === selectedMonth && itemYear === selectedYear;
+  };
+
+  const incomeTotal = data.income
+    .filter(i => isSelectedPeriod(i.date))
+    .reduce((s, i) => s + Number(i.amount), 0);
+
   const fixedTotal = data.fixedExpenses.reduce((s, e) => s + Number(e.amount), 0);
-  const varTotal = data.variableExpenses.reduce((s, e) => s + Number(e.amount), 0);
+
+  const varTotal = data.variableExpenses
+    .filter(e => isSelectedPeriod(e.date))
+    .reduce((s, e) => s + Number(e.amount), 0);
+
+  const dailyTotal = (data.dailyRegister || [])
+    .filter(e => isSelectedPeriod(e.date))
+    .reduce((s, e) => s + Number(e.amount), 0);
+
   const subsMonthly = data.subscriptions
     .filter(s => s.active)
     .reduce((total, s) => {
@@ -55,7 +78,8 @@ export default function Dashboard({ data, setData }) {
       const monthly = s.billingCycle === 'annual' ? amountVal / 12 : amountVal;
       return total + monthly;
     }, 0);
-  const totalExpenses = fixedTotal + varTotal + subsMonthly;
+
+  const totalExpenses = fixedTotal + varTotal + dailyTotal + subsMonthly;
   const netBalance = incomeTotal - totalExpenses;
   const savingsRate = incomeTotal > 0 ? (netBalance / incomeTotal) * 100 : 0;
   const totalSaved = data.savingsGoals.reduce((s, g) => s + Number(g.saved), 0);
@@ -65,9 +89,30 @@ export default function Dashboard({ data, setData }) {
 
   return (
     <div>
-      <h2 style={{fontSize:'20px',color:'var(--primary)',marginBottom:'16px'}}>
-        Panel de Control · {data.settings.month || CURRENT_MONTH} {data.settings.year}
-      </h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
+        <h2 style={{ fontSize: '20px', color: 'var(--primary)', margin: 0 }}>
+          Panel de Control · {selectedMonth} {selectedYear}
+        </h2>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <select 
+            value={data.settings.month} 
+            onChange={(e) => setData(d => ({ ...d, settings: { ...d.settings, month: e.target.value } }))}
+            style={{ width: '130px', padding: '6px 10px', fontSize: '13px', borderRadius: '6px', border: '1px solid var(--border)' }}
+          >
+            {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
+          <select 
+            value={data.settings.year} 
+            onChange={(e) => setData(d => ({ ...d, settings: { ...d.settings, year: Number(e.target.value) } }))}
+            style={{ width: '90px', padding: '6px 10px', fontSize: '13px', borderRadius: '6px', border: '1px solid var(--border)' }}
+          >
+            {[-2, -1, 0, 1, 2].map(offset => {
+              const y = CURRENT_YEAR + offset;
+              return <option key={y} value={y}>{y}</option>;
+            })}
+          </select>
+        </div>
+      </div>
 
       <div className="stats-grid">
         <div className="stat-card">
@@ -111,7 +156,7 @@ export default function Dashboard({ data, setData }) {
         <div className="card-header">
           <span className="card-title">Desglose de Gastos</span>
         </div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:'12px'}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:'12px'}}>
           <div style={{padding:'12px',background:'var(--blue-light)',borderRadius:'8px'}}>
             <div style={{fontSize:'11px',color:'var(--text-light)',textTransform:'uppercase'}}>Fijos</div>
             <div style={{fontSize:'18px',fontWeight:'700',color:'var(--blue)'}}>{fixedTotal.toFixed(2)}€</div>
@@ -120,13 +165,17 @@ export default function Dashboard({ data, setData }) {
             <div style={{fontSize:'11px',color:'var(--text-light)',textTransform:'uppercase'}}>Variables</div>
             <div style={{fontSize:'18px',fontWeight:'700',color:'var(--orange)'}}>{varTotal.toFixed(2)}€</div>
           </div>
+          <div style={{padding:'12px',background:'var(--red-light)',borderRadius:'8px'}}>
+            <div style={{fontSize:'11px',color:'var(--text-light)',textTransform:'uppercase'}}>Registro Diario</div>
+            <div style={{fontSize:'18px',fontWeight:'700',color:'var(--red)'}}>{dailyTotal.toFixed(2)}€</div>
+          </div>
           <div style={{padding:'12px',background:'var(--green-light)',borderRadius:'8px'}}>
             <div style={{fontSize:'11px',color:'var(--text-light)',textTransform:'uppercase'}}>Suscripciones/mes</div>
             <div style={{fontSize:'18px',fontWeight:'700',color:'var(--green)'}}>{subsMonthly.toFixed(2)}€</div>
           </div>
-          <div style={{padding:'12px',background:'var(--red-light)',borderRadius:'8px'}}>
+          <div style={{padding:'12px',background:'var(--gray-light)',borderRadius:'8px'}}>
             <div style={{fontSize:'11px',color:'var(--text-light)',textTransform:'uppercase'}}>Total Gastos</div>
-            <div style={{fontSize:'18px',fontWeight:'700',color:'var(--red)'}}>{totalExpenses.toFixed(2)}€</div>
+            <div style={{fontSize:'18px',fontWeight:'700',color:'var(--primary)'}}>{totalExpenses.toFixed(2)}€</div>
           </div>
         </div>
       </div>
