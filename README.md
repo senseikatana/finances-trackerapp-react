@@ -57,4 +57,4 @@ Los archivos estáticos se generan en `dist/`. Puedes subirlos a cualquier hosti
 
 ## Estructura de datos
 
-Todos los datos se guardan en `localStorage` bajo la clave `finanzas-app-data`. No hay servidor, no hay registro, no hay cookies.
+Todos los datos se guardan en `localStorage` bajo la clave `finanzas-app-data-v2`. No hay servidor, no hay registro, no hay cookies.
