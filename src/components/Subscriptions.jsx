@@ -31,7 +31,8 @@ export default function Subscriptions({ data, setData }) {
 
         <div className="subscription-grid">
           {sorted.map(s => {
-            const monthly = s.billingCycle === 'annual' ? s.amount / 12 : s.amount;
+            const amountVal = Number(s.amount) || 0;
+            const monthly = s.billingCycle === 'annual' ? amountVal / 12 : amountVal;
             return (
               <div key={s.id} className="sub-card" style={{opacity: s.active ? 1 : 0.5}}>
                 {s.active && <span className="sub-badge badge badge-green">Activa</span>}
@@ -45,7 +46,7 @@ export default function Subscriptions({ data, setData }) {
                 </div>
 
                 <div className="sub-price">
-                  {s.amount.toFixed(2)}€
+                  {amountVal.toFixed(2)}€
                   <span style={{fontSize:'12px',color:'var(--text-light)',fontWeight:'400'}}>
                     /{s.billingCycle === 'annual' ? 'año' : 'mes'}
                   </span>

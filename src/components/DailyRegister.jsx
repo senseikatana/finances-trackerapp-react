@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { EXPENSE_CATEGORIES } from '../data/defaultData';
 
 export default function DailyRegister({ data, setData }) {
   const [filter, setFilter] = useState('all');
@@ -67,7 +66,7 @@ export default function DailyRegister({ data, setData }) {
                   <td><input type="date" value={e.date} onChange={e2 => update(e.id, 'date', e2.target.value)} style={{minWidth:'90px'}} /></td>
                   <td>
                     <select value={e.category} onChange={e2 => update(e.id, 'category', e2.target.value)}>
-                      {EXPENSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      {(data.expenseCategories || []).map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </td>
                   <td><input type="text" value={e.concept} onChange={e2 => update(e.id, 'concept', e2.target.value)} placeholder="¿Qué compraste?" style={{minWidth:'100px'}} /></td>

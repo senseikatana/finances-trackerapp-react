@@ -1,5 +1,3 @@
-import { FIXED_CATEGORIES } from '../data/defaultData';
-
 export default function FixedExpenses({ data, setData }) {
   const update = (id, field, value) => setData(d => ({
     ...d, fixedExpenses: d.fixedExpenses.map(e => e.id === id ? { ...e, [field]: value } : e)
@@ -11,6 +9,8 @@ export default function FixedExpenses({ data, setData }) {
   const removeRow = (id) => setData(d => ({ ...d, fixedExpenses: d.fixedExpenses.filter(e => e.id !== id) }));
   const total = data.fixedExpenses.reduce((s, e) => s + Number(e.amount), 0);
   const paid = data.fixedExpenses.filter(e => e.paid).reduce((s, e) => s + Number(e.amount), 0);
+
+  const categories = data.fixedCategories || [];
 
   return (
     <div>
@@ -29,7 +29,7 @@ export default function FixedExpenses({ data, setData }) {
                 <tr key={e.id} style={e.paid ? {opacity:0.6} : {}}>
                   <td>
                     <select value={e.category} onChange={e2 => update(e.id, 'category', e2.target.value)}>
-                      {FIXED_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      {categories.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </td>
                   <td><input type="text" value={e.concept} onChange={e2 => update(e.id, 'concept', e2.target.value)} placeholder="Concepto" /></td>

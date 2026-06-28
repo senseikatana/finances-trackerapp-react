@@ -1,5 +1,3 @@
-import { EXPENSE_CATEGORIES } from '../data/defaultData';
-
 export default function Budget({ data, setData }) {
   const totalExpenses = (cat) => {
     const fromFixed = data.fixedExpenses

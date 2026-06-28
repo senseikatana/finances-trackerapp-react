@@ -25,7 +25,9 @@ export default function SavingsGoals({ data, setData }) {
         ) : (
           <div className="stats-grid" style={{gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))'}}>
             {data.savingsGoals.map(g => {
-              const pct = g.target > 0 ? (g.saved / g.target) * 100 : 0;
+              const targetVal = Number(g.target) || 0;
+              const savedVal = Number(g.saved) || 0;
+              const pct = targetVal > 0 ? (savedVal / targetVal) * 100 : 0;
               return (
                 <div key={g.id} className="goal-card">
                   <div className="goal-header">
@@ -52,7 +54,7 @@ export default function SavingsGoals({ data, setData }) {
                   </div>
                   <div style={{display:'flex',justifyContent:'space-between',fontSize:'12px',color:'var(--text-light)',marginTop:'4px'}}>
                     <span>Progreso: {pct.toFixed(0)}%</span>
-                    <span>Restan: {Math.max(0, g.target - g.saved).toFixed(2)}€</span>
+                    <span>Restan: {Math.max(0, targetVal - savedVal).toFixed(2)}€</span>
                   </div>
                 </div>
               );

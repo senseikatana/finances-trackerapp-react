@@ -1,5 +1,3 @@
-import { EXPENSE_CATEGORIES } from '../data/defaultData';
-
 export default function VariableExpenses({ data, setData }) {
   const update = (id, field, value) => setData(d => ({
     ...d, variableExpenses: d.variableExpenses.map(e => e.id === id ? { ...e, [field]: value } : e)
@@ -11,6 +9,8 @@ export default function VariableExpenses({ data, setData }) {
   const removeRow = (id) => setData(d => ({ ...d, variableExpenses: d.variableExpenses.filter(e => e.id !== id) }));
   const total = data.variableExpenses.reduce((s, e) => s + Number(e.amount), 0);
   const necessary = data.variableExpenses.filter(e => e.necessary).reduce((s, e) => s + Number(e.amount), 0);
+
+  const categories = data.expenseCategories || [];
 
   return (
     <div>
@@ -30,7 +30,7 @@ export default function VariableExpenses({ data, setData }) {
                   <td><input type="date" value={e.date} onChange={e2 => update(e.id, 'date', e2.target.value)} style={{minWidth:'100px'}} /></td>
                   <td>
                     <select value={e.category} onChange={e2 => update(e.id, 'category', e2.target.value)}>
-                      {EXPENSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      {categories.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </td>
                   <td><input type="text" value={e.concept} onChange={e2 => update(e.id, 'concept', e2.target.value)} placeholder="Concepto" /></td>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { defaultData } from './data/defaultData';
+import { defaultData, INCOME_CATEGORIES, FIXED_CATEGORIES, EXPENSE_CATEGORIES } from './data/defaultData';
 import Dashboard from './components/Dashboard';
 import Income from './components/Income';
 import FixedExpenses from './components/FixedExpenses';
@@ -10,6 +10,7 @@ import DailyRegister from './components/DailyRegister';
 import Budget from './components/Budget';
 import SavingsGoals from './components/SavingsGoals';
 import Debts from './components/Debts';
+import Categories from './components/Categories';
 
 const NAV = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
@@ -19,6 +20,7 @@ const NAV = [
   { id: 'subscriptions', label: 'Suscripciones', icon: '🔄' },
   { id: 'daily', label: 'Registro Diario', icon: '📝' },
   { id: 'budget', label: 'Presupuesto', icon: '🎯' },
+  { id: 'categories', label: 'Categorías', icon: '🏷️' },
   { id: 'savings', label: 'Metas Ahorro', icon: '🏦' },
   { id: 'debts', label: 'Deudas', icon: '💳' },
 ];
@@ -28,18 +30,26 @@ export default function App() {
   const [activeView, setActiveView] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const safeData = {
+    ...data,
+    incomeCategories: data.incomeCategories || INCOME_CATEGORIES,
+    fixedCategories: data.fixedCategories || FIXED_CATEGORIES,
+    expenseCategories: data.expenseCategories || EXPENSE_CATEGORIES,
+  };
+
   const renderView = () => {
     switch (activeView) {
-      case 'dashboard': return <Dashboard data={data} setData={setData} />;
-      case 'income': return <Income data={data} setData={setData} />;
-      case 'fixed': return <FixedExpenses data={data} setData={setData} />;
-      case 'variable': return <VariableExpenses data={data} setData={setData} />;
-      case 'subscriptions': return <Subscriptions data={data} setData={setData} />;
-      case 'daily': return <DailyRegister data={data} setData={setData} />;
-      case 'budget': return <Budget data={data} setData={setData} />;
-      case 'savings': return <SavingsGoals data={data} setData={setData} />;
-      case 'debts': return <Debts data={data} setData={setData} />;
-      default: return <Dashboard data={data} setData={setData} />;
+      case 'dashboard': return <Dashboard data={safeData} setData={setData} />;
+      case 'income': return <Income data={safeData} setData={setData} />;
+      case 'fixed': return <FixedExpenses data={safeData} setData={setData} />;
+      case 'variable': return <VariableExpenses data={safeData} setData={setData} />;
+      case 'subscriptions': return <Subscriptions data={safeData} setData={setData} />;
+      case 'daily': return <DailyRegister data={safeData} setData={setData} />;
+      case 'budget': return <Budget data={safeData} setData={setData} />;
+      case 'categories': return <Categories data={safeData} setData={setData} />;
+      case 'savings': return <SavingsGoals data={safeData} setData={setData} />;
+      case 'debts': return <Debts data={safeData} setData={setData} />;
+      default: return <Dashboard data={safeData} setData={setData} />;
     }
   };
 

@@ -1,5 +1,3 @@
-import { INCOME_CATEGORIES } from '../data/defaultData';
-
 export default function Income({ data, setData }) {
   const addRow = () => {
     const newId = Math.max(...data.income.map(i => i.id), 0) + 1;
@@ -10,6 +8,8 @@ export default function Income({ data, setData }) {
     ...d, income: d.income.map(i => i.id === id ? { ...i, [field]: value } : i)
   }));
   const total = data.income.reduce((s, i) => s + Number(i.amount), 0);
+
+  const categories = data.incomeCategories || [];
 
   return (
     <div>
@@ -29,7 +29,7 @@ export default function Income({ data, setData }) {
                   <td><input type="date" value={i.date} onChange={e => update(i.id, 'date', e.target.value)} style={{minWidth:'100px'}} /></td>
                   <td>
                     <select value={i.category} onChange={e => update(i.id, 'category', e.target.value)}>
-                      {INCOME_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      {categories.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </td>
                   <td><input type="text" value={i.concept} onChange={e => update(i.id, 'concept', e.target.value)} placeholder="Concepto" /></td>

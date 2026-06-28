@@ -2,8 +2,18 @@ const today = new Date();
 const currentMonth = today.getMonth();
 const currentYear = today.getFullYear();
 const months = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+  'Enero', 
+  'Febrero', 
+  'Marzo', 
+  'Abril', 
+  'Mayo', 
+  'Junio',
+  'Julio', 
+  'Agosto', 
+  'Septiembre', 
+  'Octubre', 
+  'Noviembre', 
+  'Diciembre',
 ];
 
 export const MONTHS = months;

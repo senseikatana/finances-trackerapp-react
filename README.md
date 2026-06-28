@@ -22,6 +22,22 @@ App web progresiva (PWA) para gestionar finanzas personales. Sin login, sin back
 
 El módulo de Suscripciones soporta ciclos **mensuales** y **anuales**. Las suscripciones anuales (Proton Unlimited, Internxt Drive, etc.) se convierten automáticamente a coste mensual equivalente en el Dashboard.
 
+## Gastos Fijos vs. Gastos Variables
+
+Para llevar una buena salud financiera, es crucial diferenciar entre estos dos tipos de gastos:
+
+* **Gastos Fijos (Obligatorios y Predecibles):**
+  * **¿Qué son?:** Gastos recurrentes que se repiten con frecuencia (normalmente cada mes) y cuyo importe es predecible. Suelen ser esenciales para el día a día.
+  * **Ejemplos:** Alquiler o hipoteca, facturas de servicios públicos (agua, luz, internet), seguros, préstamos y suscripciones activas.
+  * **En la app:** Se gestionan en una lista mensual donde puedes marcar cuáles ya has "Pagado" para evitar olvidos.
+
+* **Gastos Variables (Flexibles y Discrecionales):**
+  * **¿Qué son?:** Gastos del día a día que fluctúan según tus actividades, hábitos y decisiones diarias. Son más fáciles de recortar en caso de que necesites ahorrar.
+  * **Ejemplos:** Alimentación/supermercado, comer fuera, transporte, ropa, ocio, regalos y viajes.
+  * **En la app:** Se anotan en el **Registro Diario** o en **Gastos Variables**, pudiendo indicar si fueron un gasto "Necesario" o un "Capricho".
+
+> **Consejo financiero:** Si consideras que registrar cada gasto cotidiano (variables) es tedioso para tus finanzas diarias, puedes enfocarte solo en tus **Gastos Fijos**. Controlar tus gastos fijos y tus ingresos representa el 80% de la estabilidad de un presupuesto.
+
 ## Cómo ejecutar
 
 ```bash

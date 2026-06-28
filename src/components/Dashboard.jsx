@@ -8,7 +8,8 @@ export default function Dashboard({ data, setData }) {
   const subsMonthly = data.subscriptions
     .filter(s => s.active)
     .reduce((total, s) => {
-      const monthly = s.billingCycle === 'annual' ? s.amount / 12 : s.amount;
+      const amountVal = Number(s.amount) || 0;
+      const monthly = s.billingCycle === 'annual' ? amountVal / 12 : amountVal;
       return total + monthly;
     }, 0);
   const totalExpenses = fixedTotal + varTotal + subsMonthly;
@@ -100,12 +101,13 @@ export default function Dashboard({ data, setData }) {
               </tr></thead>
               <tbody>
                 {data.subscriptions.filter(s => s.active).map(s => {
-                  const monthly = s.billingCycle === 'annual' ? s.amount / 12 : s.amount;
+                  const amountVal = Number(s.amount) || 0;
+                  const monthly = s.billingCycle === 'annual' ? amountVal / 12 : amountVal;
                   return (
                     <tr key={s.id}>
                       <td><strong>{s.name}</strong><br /><span className="text-muted">{s.category}</span></td>
                       <td><span className={`badge ${s.billingCycle === 'annual' ? 'badge-blue' : 'badge-green'}`}>{s.billingCycle === 'annual' ? 'Anual' : 'Mensual'}</span></td>
-                      <td className="text-right"><strong>{s.amount.toFixed(2)}€</strong></td>
+                      <td className="text-right"><strong>{amountVal.toFixed(2)}€</strong></td>
                       <td style={{fontSize:'12px'}}>{s.nextPayment}</td>
                       <td className="text-right">{monthly.toFixed(2)}€</td>
                     </tr>
