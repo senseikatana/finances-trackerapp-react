@@ -28,7 +28,9 @@ const NAV = [
 export default function App() {
   const [data, setData] = useLocalStorage('finanzas-app-data-v2', defaultData);
   const [activeView, setActiveView] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    return typeof window !== 'undefined' ? window.innerWidth > 768 : false;
+  });
 
   const safeData = {
     ...data,
@@ -55,21 +57,39 @@ export default function App() {
 
   return (
     <div className="app">
-      <button className="mobile-menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
-        {sidebarOpen ? '✕' : '☰'}
-      </button>
+      {!sidebarOpen && (
+        <button className="menu-toggle-btn" onClick={() => setSidebarOpen(true)} title="Mostrar menú">
+          ☰
+        </button>
+      )}
 
-      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)}>
+      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <h1>Finanzas App</h1>
-          <p>Control personal</p>
+          <a href="/" onClick={(e) => { e.preventDefault(); setActiveView('dashboard'); }} className="sidebar-logo-link">
+            <svg className="logo-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            <div className="sidebar-title-group">
+              <h1>Finanzas App</h1>
+              <p>Control personal</p>
+            </div>
+          </a>
+          <button className="sidebar-close-btn" onClick={() => setSidebarOpen(false)} title="Ocultar menú">
+            ✕
+          </button>
         </div>
         <nav className="sidebar-nav">
           {NAV.map(n => (
             <button
               key={n.id}
               className={`nav-item ${activeView === n.id ? 'active' : ''}`}
-              onClick={() => setActiveView(n.id)}
+              onClick={() => {
+                setActiveView(n.id);
+                if (window.innerWidth <= 768) {
+                  setSidebarOpen(false);
+                }
+              }}
             >
               <span className="nav-icon">{n.icon}</span>
               <span className="nav-label">{n.label}</span>
@@ -81,9 +101,13 @@ export default function App() {
         </div>
       </aside>
 
-      <main className="main">
+      <main className={`main ${sidebarOpen ? 'sidebar-active' : ''}`}>
         {renderView()}
       </main>
+
+      {sidebarOpen && (
+        <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+      )}
     </div>
   );
 }
