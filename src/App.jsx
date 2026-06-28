@@ -29,7 +29,7 @@ export default function App() {
   const [data, setData] = useLocalStorage('finanzas-app-data-v2', defaultData);
   const [activeView, setActiveView] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(() => {
-    return typeof window !== 'undefined' ? window.innerWidth > 768 : false;
+    return typeof window !== 'undefined' ? window.innerWidth > 480 : false;
   });
 
   const safeData = {
@@ -86,7 +86,7 @@ export default function App() {
               className={`nav-item ${activeView === n.id ? 'active' : ''}`}
               onClick={() => {
                 setActiveView(n.id);
-                if (window.innerWidth <= 768) {
+                if (window.innerWidth <= 480) {
                   setSidebarOpen(false);
                 }
               }}
