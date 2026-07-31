@@ -30,7 +30,6 @@ export default function Budget({ data, setData }) {
     ...d, budget: d.budget.map(b => b.category === category ? { ...b, planned: Number(value) } : b)
   }));
 
-  const categories = data.budget.map(b => b.category);
   const totalPlanned = data.budget.reduce((s, b) => s + Number(b.planned), 0);
   const totalReal = data.budget.reduce((s, b) => s + totalExpenses(b.category), 0);
 

@@ -40,6 +40,10 @@ export const defaultData = {
     year: CURRENT_YEAR,
   },
 
+  incomeCategories: [...INCOME_CATEGORIES],
+  fixedCategories: [...FIXED_CATEGORIES],
+  expenseCategories: [...EXPENSE_CATEGORIES],
+
   income: [],
 
   fixedExpenses: [],
@@ -74,6 +78,10 @@ export const sampleData = {
     month: CURRENT_MONTH,
     year: CURRENT_YEAR,
   },
+
+  incomeCategories: [...INCOME_CATEGORIES],
+  fixedCategories: [...FIXED_CATEGORIES],
+  expenseCategories: [...EXPENSE_CATEGORIES],
 
   income: [
     { id: 1, date: new Date().toISOString().split('T')[0], category: 'Nómina', concept: 'Nómina mensual', amount: 2400, notes: 'Ingreso principal' },

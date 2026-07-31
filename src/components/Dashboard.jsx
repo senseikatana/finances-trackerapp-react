@@ -1,4 +1,3 @@
-import { useLocalStorage } from '../hooks/useLocalStorage';
 import { defaultData, MONTHS, CURRENT_MONTH, CURRENT_YEAR, sampleData } from '../data/defaultData';
 
 export default function Dashboard({ data, setData }) {
